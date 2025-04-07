@@ -49,19 +49,20 @@ public class JteTemplateLlmServiceFactory<ResponseType> {
                         + PromptTemplate.class.getSimpleName());
             }
 
-            // Continue with existing parameter validation
+            // Continue with template parameter validation
             String templatePath = packagePath + "/" + promptAnnotation.fileName();
             Map<String, Class<?>> templateParams = templateEngine.getParamInfo(templatePath);
             Map<String, Parameter> declaredParams = new HashMap<>();
 
-            // ... rest of the validation code remains the same
-
-            // Collect all parameters declared in the method
+            // Check that all parameters have @PromptParam annotation
             for (Parameter parameter : method.getParameters()) {
                 PromptParam paramAnnotation = parameter.getAnnotation(PromptParam.class);
-                if (paramAnnotation != null) {
-                    declaredParams.put(paramAnnotation.value(), parameter);
+                if (paramAnnotation == null) {
+                    throw new IllegalArgumentException("Parameter '" + parameter.getName() + "' in method "
+                            + method.getName() + " of " + serviceInterface.getSimpleName()
+                            + " must be annotated with @" + PromptParam.class.getSimpleName());
                 }
+                declaredParams.put(paramAnnotation.value(), parameter);
             }
 
             // Check for missing or extra parameters

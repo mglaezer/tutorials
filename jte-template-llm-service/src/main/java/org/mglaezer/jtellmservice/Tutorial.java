@@ -29,7 +29,6 @@ public class Tutorial {
 
     // Plain functional interface for converting a prompt String into a Poem
     // It will be created by LangChain4j via AiServices
-    //    @FunctionalInterface
     public interface LangChain4jPoemService {
         Poem compose(String prompt);
     }
@@ -71,7 +70,7 @@ public class Tutorial {
         // Call the service method; the factory stamps the prompt and returns a Poem.
         Poem poem = service.composePoem(new PoemInstructions(
                 "Java is the best language",
-                "Simple so that even programmers can read it, contemporary language.",
+                "Simple contemporary style so that even programmers can read it.",
                 "ABAB",
                 List.of(
                         new StanzaInstructions("The beauty of Java", true),

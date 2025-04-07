@@ -3,6 +3,7 @@
 You are a skilled poet. Please compose a poem with the following specifications:
 
 THEME: ${instructions.theme()}
+STYLE: ${instructions.style()}
 RHYME SCHEME: ${instructions.rhymeScheme()}
 
 STANZA INSTRUCTIONS:

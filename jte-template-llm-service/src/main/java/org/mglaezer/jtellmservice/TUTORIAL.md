@@ -159,7 +159,7 @@ CodeResolver codeResolver - standard JTE interface to specify the root of the te
 
 Service Creation Method
 
-create(Class<S> serviceInterface) - Will generate a dynamic implementation of the interface
+```create(Class<S> serviceInterface)``` - Will generate a dynamic implementation of the interface
 Returns type S, which is the service interface type the client wants to use
 Will use Java's reflection and proxies to create the implementation
 This factory will act as a bridge between:

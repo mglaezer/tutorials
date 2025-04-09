@@ -1,88 +1,114 @@
-# Creating Type-Safe Prompt Templates with JTE for Java LLM Services
+# Advanced Prompt Templating with JTE for Java LLM Services including LangChain4J
 
 ## 1. Introduction
 
-- Benefits of template-based approach for prompt engineering
+In this tutorial, we'll build a templating system for LLM prompts using Java Template Engine (JTE).
+We'll create a universal solution that will work with any LLM service, including LangChain4J.
 
-A template-based approach to prompt engineering offers significant advantages for LLM-powered applications. Type safety
-prevents runtime errors through compile-time validation, ensuring all required parameters are present before execution.
-This approach creates a clear separation of concerns, isolating prompt design from business logic for better
-maintainability.
+### 1.1. The Challenge of Prompt Engineering
 
-Templates enable modular composition of prompts through reusable components, reducing duplication and establishing
-consistent patterns across an application. They can be version-controlled like regular code, making prompt evolution
-trackable with clear change history. JTE's precompilation strategy delivers performance benefits by eliminating runtime
-parsing overhead, generating optimized Java classes instead. Together, these advantages create more robust,
-maintainable, and efficient LLM applications that can evolve with changing requirements.
+When developing applications with Large Language Models (LLMs), prompt engineering becomes an important part of our
+work. As our applications grow, we face several challenges:
 
-## Shortcomings of LangChain4J's PromptTemplate
+1. Prompts become increasingly complex
+2. Data structures for LLM communication get more sophisticated
+3. We need to reuse prompt components across different use cases
 
-The current at the time of writing templating solution in LangChain4J is PromptTemplate.
+Without a good templating system, managing these elements directly in Java code quickly becomes difficult to maintain.
 
-While adequate for simple prompts,
-LangChain4J's PromptTemplate has significant shortcomings for advanced prompt engineering:
+### 1.2. Benefits of Templating for LLM Applications
 
-- **Limited syntax**: No conditionals, loops, or template inheritance
-- **Restricted expression language**: Only basic variable substitution without inline logic
-- **No type safety**: Potential runtime errors from missing parameters
-- **Runtime parsing**: Performance bottlenecks without precompilation
-- **Lack of modularization**: No includes or reusable components
-- **Missing context-aware escaping**: Potential security risks
-- **No IDE integration**: Absence of debugging or real-time validation
+Templates offer three key benefits for LLM applications:
 
-## Benefits of using JTE for prompt management
+First, they let us build modular, reusable components. This reduces code duplication and helps maintain consistent
+patterns across your application.
 
-JTE addresses these limitations with:
+Second, templates provide advanced control flows like loops and conditionals. This means we can create more
+sophisticated prompts without making our code complex.
 
-- **Rich templating features**: Template inheritance, conditional logic, and loops
-- **Type-safe includes**: Compile-time validation of template parameters
-- **Precompilation**: Optimized performance with generated Java classes
-- **Native Java expressions**: Full access to Java/Kotlin in templates
-- **Modular design**: Reusable components and template composition
-- **IDE support**: Syntax highlighting and debugging capabilities
-- **Security features**: Context-aware escaping and output handling
+Third, since templates are stored as files, we can track their changes in version control just like regular code. This
+gives us a clear history of how our prompts evolve over time.
 
-In this tutorial, we'll explore how to create a type-safe prompt template system using JTE and Java's dynamic proxies.
+These benefits help us create LLM applications that are easier to maintain and adapt as requirements change.
 
-## Step-by-Step Development Plan
+### 1.3. Current Limitations in LangChain4J
 
-How JteTemplateLlmServiceFactory Will Work
-The JteTemplateLlmServiceFactory will implement a type-safe approach to LLM prompt templating using JTE (Java Template
-Engine). Here's how it will work:
+At the time of writing, the primary templating solution in LangChain4J is PromptTemplate. While adequate for simple
+prompts, it has significant
+shortcomings for advanced prompt engineering:
 
-Service Interface Definition
+Currently, LangChain4J's PromptTemplate offers basic variable substitution, but lacks features needed for advanced
+prompt engineering:
 
-Developers will define service interfaces with methods annotated with @PromptTemplate to specify template files
-Method parameters will use @PromptParam to map values to named template parameters
-Dynamic Proxy Generation
+- No inline logic like conditionals or loops
+- Limited IDE support without syntax highlighting or validation
+- No simple way to create reusable components through includes
 
-The factory will create a runtime implementation of the service interface
-This proxy will intercept method calls to process templates and communicate with the LLM
-Template Processing
+### 1.4. JTE as a Solution
 
-When a method is called, the proxy will:
-Identify the correct template file from annotations
-Map method parameters to template variables based on annotation metadata
-Render the JTE template with the provided parameters
-LLM Integration
+JTE addresses these limitations comprehensively:
 
-The rendered template will become a complete prompt string
-The prompt will be passed to the LLM service function (from LangChain4j or any other library)
-The LLM response will be automatically converted to the method's return type
-Response Handling
+JTE provides rich templating features including conditional logic and loops. It supports template composition with
+includes. For development efficiency, JTE offers IDE plugins with syntax highlighting and type validation.
 
-The conversion from LLM response to Java objects will be handled by the underlying LLM library
-For structured data like our Poem record, JSON responses will be deserialized automatically
-If structured response handling isn't supported, the factory will work with the returned String
+In this tutorial, we'll explore how to use these JTE features to build a robust templating system for LLM applications.
 
-Now let's build the factory step-by-step:
+## 2. Step-by-Step Development Plan
 
-# Creating Annotations
+In this section, we'll outline our approach to building a flexible templating system for LLM applications that works
+with any LLM library.
 
-In this section, we'll create the two annotations needed for our templating system:
+### 2.1. System Architecture Overview
 
-PromptTemplate Annotation
-First, let's create the @PromptTemplate annotation that will connect methods to JTE template files:
+Our templating system will use four main components:
+
+- Annotated service interfaces define the LLM interactions
+- External JTE templates contain the prompt structures
+- A factory creates dynamic implementations at runtime
+- A universal adapter function connects to any LLM implementation
+
+While LangChain4j has its own annotation-driven system, our approach will follow a similar pattern to offer more
+powerful templating features.
+
+### 2.2. Service Interface Definition
+
+Developers will define service interfaces with:
+
+- Methods annotated to specify template files
+- Parameters annotated to map values to named template variables
+
+This annotation-based approach creates a clean separation between the service definition and templating details.
+
+### 2.3. Dynamic Proxy Generation
+
+At runtime the framework will work by:
+
+- Creating implementations of service interfaces using Java's dynamic proxy mechanism
+- Identifying the correct template file from annotations
+- Mapping method parameters to template variables based on annotation metadata
+- Rendering the JTE template with the provided parameters
+- Processing the call by passing the resolved prompts to underlying services
+
+## 3. Creating Annotations
+
+In this section, we'll create the two annotations needed for our templating system.
+
+An example of usage is shown below:
+
+```java
+public interface DocumentAnalysisService {
+
+    @PromptTemplate(fileName = "analyze_document.jte")
+    AnalysisReport analyzeLegalDocument(
+            @PromptParam("document") LegalDocument document,
+            @PromptParam("analysisOptions") AnalysisOptions options
+    );
+}
+```
+
+### 3.1. The PromptTemplate Annotation
+
+First, we need an annotation to link methods with template files:
 
 ```java
 
@@ -96,11 +122,12 @@ public @interface PromptTemplate {
 }
 ```
 
-The @PromptTemplate annotation will be applied to methods in our service interfaces. The key features are:
-fileName() - Specifies which JTE template file to use for rendering
+This annotation marks methods that should use template-based prompt generation. The fileName() specifies which template
+to use for the annotated method.
 
-PromptParam Annotation
-Next, let's create the @PromptParam annotation to map method parameters to template variables:
+### 3.2. The PromptParam Annotation
+
+Next, we need a way to map method parameters to template variables:
 
 ```java
 
@@ -115,16 +142,12 @@ public @interface PromptParam {
 }
 ```
 
-The @PromptParam annotation will be applied to parameters in our service interface methods:
+This annotation maps method parameters to template variables. When called, annotated parameters are passed to the
+template using the specified name in value().
 
-@Retention(RetentionPolicy.RUNTIME) - Makes it available at runtime
-@Target(ElementType.PARAMETER) - Restricts it to method parameters
-value() - Defines the name that will be used in the template to reference this parameter
+## 4. Designing the Factory Class
 
-# Designing the Factory Class Structure
-
-The JteTemplateLlmServiceFactory will be the core class that connects our annotated interfaces with JTE templates and
-the LLM. Here's how we'll structure it:
+Next, we'll design a factory class to bridge annotated interfaces with JTE templates and LLM services.
 
 ```java
 public class JteTemplateLlmServiceFactory<ResponseType> {
@@ -143,33 +166,36 @@ public class JteTemplateLlmServiceFactory<ResponseType> {
 }
 ```
 
-Key design elements:
+The factory design has three key components:
 
-Generic Type Parameter <ResponseType>
+### 4.1. Generic Response Type
 
-Represents the return type from the LLM service
-Makes the factory flexible to work with different response types.
+The `<ResponseType>` parameter defines the LLM service's return type. For services returning simple text, use `String`
+instead of complex structures like `Poem` or `AnalysisReport`.
 
-Constructor Parameters
-Function<String, ResponseType> llmResponseProvider - Takes a rendered template string and returns an object of type
-ResponseType
-we expect this implementation from langchain4j or any other LLM library. In case some llm library does not support
-structured data, we can use String as the ResponseType.
-CodeResolver codeResolver - standard JTE interface to specify the root of the templates.
+### 4.2. Constructor Parameters
 
-Service Creation Method
+The factory requires:
 
-```create(Class<S> serviceInterface)``` - Will generate a dynamic implementation of the interface
-Returns type S, which is the service interface type the client wants to use
-Will use Java's reflection and proxies to create the implementation
-This factory will act as a bridge between:
+1. LLM Service Function (`Function<String, ResponseType>`):
+    - The underlying LLM service
+    - Input: rendered prompt string
+    - Output: response of specified type
+    - Compatible with any LLM library, including LangChain4j
 
-Template files managed by JTE
-Service interfaces defined by the developer
-The LLM function (from langchain4j or any other library) that processes prompts
-The generic structure allows for different LLM backends while maintaining type safety throughout the process.
+2. Template Source (JTE's `CodeResolver`):
+    - Locates template files
+    - Supports file system or resource paths
+    - Supports placing templates near Java files for development
 
-# Implement Dynamic Proxy Generation
+### 4.3. Service Creation Method
+
+The `create()` method:
+
+- Takes: service interface class
+- Returns: working implementation that handles template loading and parameter mapping
+
+## 5. Implementing Dynamic Proxy Generation
 
 The core of our implementation uses Java's dynamic proxy mechanism to create runtime implementations of service
 interfaces. Here's how we implement the proxy generation:
@@ -185,15 +211,18 @@ public <T> T create(Class<T> serviceInterface) {
 }
 ```
 
-This method:
+### 5.1. Dynamic Proxy Creation
 
-Validates the service interface - Checks that all methods have proper annotations and template parameters match
-Creates a dynamic proxy - Uses Java's built-in Proxy class to generate an implementation
-Configures the proxy with:
-The interface's class loader
-The interface to implement
-A custom invocation handler
-The invocation handler is implemented as an inner class:
+The factory creates service implementations at runtime using Java's proxy mechanism. It:
+
+- Validates the service interface for correct annotations and template parameters
+- Uses `Proxy.newProxyInstance()` to generate a concrete implementation
+- Connects the proxy to a custom invocation handler
+- Returns a working implementation of the requested interface
+
+### 5.2. Custom Invocation Handler
+
+The invocation handler processes all method calls and is implemented as an inner class:
 
 ```java
 private class JteTemplateLlmInvocationHandler implements InvocationHandler {
@@ -215,19 +244,19 @@ private class JteTemplateLlmInvocationHandler implements InvocationHandler {
 
 ```
 
-The handler:
+### 5.3. Method Interception Flow
 
-Stores a reference to the service interface class
-Handles method calls from the proxy
-Special-cases Object methods like equals() and toString()
-For service methods, processes templates and calls the LLM function
-This dynamic proxy approach eliminates the need to write concrete implementations for each service interface, with the
-proxy intercepting method calls at runtime and applying our template processing logic.
+The handler processes each method call as follows:
 
-# Build Template Processing Logic
+- Stores the service interface class reference
+- Intercepts all method calls to the proxy instance
+- Handles Object methods (`equals()`, `toString()`) separately
+- Renders templates and forwards prompts to the LLM
+- Returns responses in the method's declared type
 
-Now that we've implemented the dynamic proxy mechanism, we need to focus on the core template processing logic. The
-preparePrompt method handles this critical functionality:
+### 6. Template Processing Logic
+
+After setting up the proxy mechanism, we implement the template processing logic in the `preparePrompt` method:
 
 ```java
 private String preparePrompt(Method method, Object[] args, Package pkg) {
@@ -251,172 +280,52 @@ private String preparePrompt(Method method, Object[] args, Package pkg) {
 }
 ```
 
-This implementation performs three key operations:
+### 6.1. Template Path Resolution
 
-Extract template paths from annotations
+The implementation resolves template paths by:
 
-Converts the Java package name to a file path format (org.example → org/example)
-Retrieves the template filename from the @PromptTemplate annotation
-Combines these to form the complete template path
-Map method parameters to template variables
+- Converting package names to file paths (org.example → org/example)
+- Getting the template filename from `@PromptTemplate`
+- Combining these to form the complete template path
 
-Processes each method parameter with its corresponding argument
-For parameters annotated with @PromptParam, extracts the variable name
-Creates a parameter map where keys are template variable names and values are the actual arguments
-Implement JTE template rendering
+Templates can be stored alongside service interfaces, in resources folder, or externally.
 
-Creates a StringOutput to capture the rendered content
-Passes the template path and parameter map to JTE's template engine
-Renders the template with all variables substituted
-Returns the complete rendered prompt as a string
-The template processing logic maintains type safety by using JTE's capabilities to validate templates at compile time,
-ensuring that all required template parameters are provided and correctly typed.
+### 6.2. Parameter Mapping
 
-# Add Method Invocation Handling
+The method maps Java parameters to template variables by:
 
-The core of our dynamic proxy implementation is the invocation handler, which intercepts method calls and processes them
-using our templating system. Let's examine how this works:
+- Extracting variable names from `@PromptParam` annotations
+- Creating a map of template variable names to argument values
 
-```java
-private class JteTemplateLlmInvocationHandler implements InvocationHandler {
-    private final Class<?> serviceInterface;
+### 6.3. Template Rendering
 
-    private JteTemplateLlmInvocationHandler(Class<?> serviceInterface) {
-        this.serviceInterface = serviceInterface;
-    }
+The final step renders the template:
 
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getDeclaringClass() == Object.class) {
-            return method.invoke(this, args);
-        }
-        String prompt = preparePrompt(method, args, serviceInterface.getPackage());
-        return llmResponseProvider.apply(prompt);
-    }
-}
-```
+- Creates JTE's `StringOutput` for rendered content
+- Passes template path and parameter map to JTE
+- Returns the complete rendered prompt as a string
 
-The invocation handler performs these key operations:
+This rendering process ensures all required template parameters are provided.
 
-Method interception
+## 7. Error Handling and Validation
 
-Implements Java's InvocationHandler interface to catch all method calls on the proxy
-Stores a reference to the service interface to maintain context for template resolution
-Receives the proxy instance, called method, and argument values at runtime
-Special method handling
+The system performs several validation checks when creating services:
 
-Checks if the method belongs to Object.class (like toString(), equals(), etc.)
-For Object methods, delegates to the handler's own implementation using method.invoke(this, args)
-This prevents LLM calls for basic Object functionality
-Template processing
+Each service interface method must have a `@PromptTemplate` annotation to specify its template file.
 
-For service interface methods, calls preparePrompt() to process templates
-Uses method reflection data to locate template files and extract parameters
-Renders the template with the provided arguments
-LLM integration
+All method parameters must have `@PromptParam` annotations to:
 
-Takes the fully rendered prompt string and passes it to the llmResponseProvider
-The provider function handles the actual communication with the LLM
-Returns the LLM response directly, which will be cast to the method's return type
-This invocation handler design keeps the proxy implementation clean and focused, with clear separation between
-intercepting method calls, processing templates, and communicating with the LLM service.
+- Ensure explicit parameter mapping
+- Prevent parameters from being silently ignored
 
-# Implement Response Processing
+JTE's type checking provides additional validation during template rendering.
 
-Response processing is streamlined by the factory's generic type design. Let's examine how responses from the LLM are
-handled and converted to the expected return types:
+## 8. Complete Example: Poem Generation Service
 
-```java
-public class JteTemplateLlmServiceFactory<ResponseType> {
-    private final Function<String, ResponseType> llmResponseProvider;
+Let's explore a complete example of using LLM to generate poems with our template-based approach.
 
-    // Constructor and other methods...
+### 8.1. Domain Model
 
-    // Inside JteTemplateLlmInvocationHandler.invoke()
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // ... template processing code ...
-        String prompt = preparePrompt(method, args, serviceInterface.getPackage());
-        return llmResponseProvider.apply(prompt);
-    }
-}
-```
-
-The response processing system works through:
-
-Generic Type Declaration
-
-The factory uses a type parameter <ResponseType> to define what all methods will return
-This ensures type consistency across the service interface
-Function-based Integration
-
-The Function<String, ResponseType> provides a clean abstraction for any LLM service
-It accepts a rendered prompt string and produces the typed response
-This allows integration with any LLM library that can be adapted to this functional interface
-Direct Return Type Handling
-
-The proxy returns the result of llmResponseProvider.apply(prompt) directly
-Java's dynamic proxy mechanism automatically casts this to the method's declared return type
-No manual conversion code is needed for each method
-Integration Examples
-
-With LangChain4j: Function<String, Poem> aiService = langChain4jPoemService::compose;
-With other LLM libraries: Wrap their API calls in a function that handles deserialization
-This approach provides complete flexibility in how responses are processed. The underlying LLM library (like
-LangChain4j) typically handles the conversion from raw LLM text to structured Java objects through mechanisms like JSON
-deserialization.
-
-# Add Error Handling and Validation
-
-A robust templating system requires thorough validation to catch configuration errors early. Without proper validation,
-issues like missing parameters or incorrect template paths would only surface at runtime, potentially causing production
-failures.
-
-Our implementation includes several validation checks performed at service creation time:
-
-Method Annotation Validation
-
-Each service interface method must be annotated with @PromptTemplate
-This ensures every method has an associated template file
-Early validation prevents runtime errors when calling methods
-Parameter Annotation Validation
-
-All method parameters must be annotated with @PromptParam
-Prevents parameters from being silently ignored during template rendering
-Makes the parameter mapping explicit and intentional
-Template Existence Verification
-
-Template paths are resolved using the interface package structure
-The system verifies templates exist before any method is called
-Fails fast if templates are missing or incorrectly referenced
-Parameter Consistency Validation
-
-Compares template parameter requirements with method parameters
-Detects missing parameters needed by the template
-Identifies extra parameters provided by methods but not used in templates
-Ensures bidirectional consistency between code and templates
-Detailed Error Reporting
-
-Error messages clearly identify which method or parameter has issues
-Includes specific information about missing or extra parameters
-References template paths to help quickly locate problems
-This comprehensive validation approach creates a strong contract between service interfaces and templates. By validating
-everything at service creation time rather than method invocation, the system catches configuration errors immediately
-during application startup or testing.
-
-The validation system enforces type safety and parameter consistency, ensuring that when a method is called, all
-necessary template parameters will be available and correctly mapped. This "fail fast" philosophy prevents subtle errors
-from propagating to production environments.
-
-The complete implementation of these validation checks is available in the GitHub project referenced at the end of this
-tutorial.
-
-## 5. Complete Example: Poem Generation Service
-
-Let's explore a practical example of our template-based approach with a poem generation service. This section walks
-through creating a complete application that generates poems according to structured instructions.
-
-Domain Model
 First, we define a domain model to represent poems and generation instructions:
 
 ```java
@@ -435,11 +344,80 @@ public record Poem(String title, String content) {
 
 ```
 
-TBD: need to explain the purpose of the above.
+These record classes provide a structured way to:
 
-Service Interfaces
-We define two service interfaces: one for direct LLM interaction (via langchain4j) and another for our template-based
-approach:
+- Define poem generation parameters with `PoemInstructions`
+- Specify individual stanza details with `StanzaInstructions`
+- Represent the generated output using the `Poem` class
+
+### 8.2. Template Design
+
+The system combines two JTE template files to construct the complete prompt:
+
+#### 8.2.1. Main Template (compose_poem_prompt.jte)
+
+```jte
+@param org.mglaezer.jtellmservice.Tutorial.PoemInstructions instructions
+
+You are a skilled poet. Please compose a poem with the following specifications:
+
+THEME: ${instructions.theme()}
+STYLE: ${instructions.style()}
+RHYME SCHEME: ${instructions.rhymeScheme()}
+
+STANZA INSTRUCTIONS:
+@for(var stanzaInstructions : instructions.stanzaInstructions())
+@template.org.mglaezer.jtellmservice.compose_stanza_instructions(stanzaInstructions = stanzaInstructions)
+@endfor
+
+Please return your response in the following JSON format:
+{
+  "title": "Your creative title for the poem",
+  "content": "The full text of your poem with proper formatting"
+}
+```
+
+This main template demonstrates several key features:
+
+- Type-safe parameter declaration with full package path
+- Direct access to object properties via method calls (`instructions.theme()`)
+- Control flow with a `@for` loop to iterate through stanza instructions
+- Template composition by including the stanza instructions sub-template
+- Structured output format instructions for consistent JSON responses (while output structuring is a complex topic
+  beyond
+  this tutorial's scope, this simple instruction suffices for our example)
+
+#### 8.2.2. Sub-Template (compose_stanza_instructions.jte)
+
+```jte
+@param org.mglaezer.jtellmservice.Tutorial.StanzaInstructions stanzaInstructions
+
+- Stanza idea: ${stanzaInstructions.stanzaIdea()}
+  @if(stanzaInstructions.okToDeviate())
+  (You may creatively adapt this idea if it improves the poem)
+  @else
+  (Please adhere closely to this idea)
+  @endif
+```
+
+This sub-template shows:
+
+- Modular reusability through template composition
+- Conditional rendering with `@if/@else` statements
+- Property access from nested model objects
+- Clean separation of concerns with focused sub-templates
+
+The template system creates a clean separation between:
+
+1. The structure of the prompt (in templates)
+2. The data model (Java records)
+3. The service definition (interface)
+4. The LLM integration (factory and invocation handler)
+
+### 8.3. Service Interfaces
+
+Our implementation defines two distinct service interfaces: an underlying LangChain4j interface for direct LLM
+interaction, and a template-based interface for structured prompt generation introduced in this article:
 
 ```java
 // Plain functional interface for converting a prompt String into a Poem
@@ -455,13 +433,15 @@ public interface TemplatedPoemService {
 }
 ```
 
-The key differences are:
+The key differences between these interfaces:
 
-LangChain4jPoemService takes a raw string prompt
-TemplatedPoemService uses a structured PoemInstructions object and connects to a JTE template
+- `LangChain4jPoemService` takes a raw string prompt
+- `TemplatedPoemService` uses a structured `PoemInstructions` object and connects to a JTE template, providing better
+  organization and type safety.
 
-Putting It All Together
-Now we connect everything in one method for convenience:
+### 8.4. Putting It All Together
+
+Now we connect everything in the application's main method:
 
 ```java
 public static void main(String[] args) {
@@ -505,6 +485,20 @@ public static void main(String[] args) {
 }
 
 ```
+
+This implementation demonstrates:
+
+1. Creating the underlying OpenAI model
+2. Building the LangChain4j service using its factory (this can be any LLM library)
+3. Wrapping the service as a Function compatible with our factory
+4. Setting up the template resolver (likely done once in the application)
+5. Creating our templated service factory
+6. Instantiating the service interface
+7. Using structured instructions data to generate the poem
+8. Displaying the result
+
+By using the templated approach, we gain strong type safety, explicit parameter mapping, and the ability to leverage
+JTE's powerful templating features for complex prompt engineering.
 
 ## 6. Conclusion
 

@@ -491,6 +491,22 @@ public static void main(String[] args) {
     // 8. Display the generated poem
     System.out.println(poem);
 }
+```
+
+One of the possible outputs:
+
+```
+=== Coffee and Code ===
+
+Java flows like water, clean and bright,
+With objects built to last through night and day.
+Its structure gives our programs strength and light,
+A language where the best minds love to play.
+
+Python slithers slow, a beginner's choice,
+With spaces that confuse the careful eye.
+While Java stands with power in its voice,
+Python's simple tricks make real coders sigh.
 
 ```
 

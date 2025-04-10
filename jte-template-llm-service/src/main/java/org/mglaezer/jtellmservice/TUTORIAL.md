@@ -289,8 +289,8 @@ The implementation resolves template paths by:
 
 Templates can be stored alongside service interfaces, in resources folder, or externally.
 
-We will leave additional variants of template path resolution as an exercise for the reader.
-Those can include placing templates in the root directory or even in the database.
+We will leave alternative variants of template path resolution as an exercise for the reader.
+Those can include placing templates as top-level files in the specified template directory or even in the database.
 If some flexibility is required, it is better to create a template path resolution strategy
 using the Strategy design pattern. If even more flexibility is required, the reader
 can use the Strategy design pattern not only for template path resolution, but also for template rendering.

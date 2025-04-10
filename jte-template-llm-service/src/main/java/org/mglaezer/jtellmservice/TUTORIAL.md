@@ -21,7 +21,7 @@ Without a good templating system, managing these elements directly in Java code 
 Templates offer three key benefits for LLM applications:
 
 First, they let us build modular, reusable components. This reduces code duplication and helps maintain consistent
-patterns across your application.
+patterns across our application.
 
 Second, templates provide advanced control flows like loops and conditionals. This means we can create more
 sophisticated prompts without making our code complex.
@@ -41,7 +41,7 @@ Currently, LangChain4J's PromptTemplate offers basic variable substitution, but 
 prompt engineering:
 
 - No inline logic like conditionals or loops
-- Limited IDE support without syntax highlighting or validation
+- Limited IDE support without syntax highlighting or type validation
 - No simple way to create reusable components through includes
 
 ### 1.4. JTE as a Solution
@@ -55,7 +55,7 @@ In this tutorial, we'll explore how to use these JTE features to build a robust 
 
 ## 2. Step-by-Step Development Plan
 
-In this section, we'll outline our approach to building a flexible templating system for LLM applications that works
+In this section, we'll outline our approach to building a templating system for LLM applications that works
 with any LLM library.
 
 ### 2.1. System Architecture Overview
@@ -166,12 +166,12 @@ public class JteTemplateLlmServiceFactory<ResponseType> {
 }
 ```
 
-The factory design has three key components:
+The factory design has three key design elements:
 
 ### 4.1. Generic Response Type
 
 The `<ResponseType>` parameter defines the LLM service's return type. For services returning simple text, use `String`
-instead of complex structures like `Poem` or `AnalysisReport`.
+instead of complex structures.
 
 ### 4.2. Constructor Parameters
 
@@ -248,7 +248,6 @@ private class JteTemplateLlmInvocationHandler implements InvocationHandler {
 
 The handler processes each method call as follows:
 
-- Stores the service interface class reference
 - Intercepts all method calls to the proxy instance
 - Handles Object methods (`equals()`, `toString()`) separately
 - Renders templates and forwards prompts to the LLM
@@ -290,6 +289,12 @@ The implementation resolves template paths by:
 
 Templates can be stored alongside service interfaces, in resources folder, or externally.
 
+We will leave additional variants of template path resolution as an exercise for the reader.
+Those can include placing templates in the root directory or even in the database.
+If some flexibility is required, it is better to create a template path resolution strategy
+using the Strategy design pattern. If even more flexibility is required, the reader
+can use the Strategy design pattern not only for template path resolution, but also for template rendering.
+
 ### 6.2. Parameter Mapping
 
 The method maps Java parameters to template variables by:
@@ -320,9 +325,12 @@ All method parameters must have `@PromptParam` annotations to:
 
 JTE's type checking provides additional validation during template rendering.
 
-## 8. Complete Example: Poem Generation Service
+The reader can find the complete implementation in
+the [JteTemplateLlmServiceFactory](src/main/java/org/mglaezer/jtellmservice/JteTemplateLlmServiceFactory.java) class.
 
-Let's explore a complete example of using LLM to generate poems with our template-based approach.
+## 8. Complete Example: Poem Composing Service
+
+Let's explore a complete example of using LLM to compose poems with our template-based approach.
 
 ### 8.1. Domain Model
 
@@ -435,7 +443,7 @@ public interface TemplatedPoemService {
 
 The key differences between these interfaces:
 
-- `LangChain4jPoemService` takes a raw string prompt
+- `LangChain4jPoemService` takes a resolved string prompt
 - `TemplatedPoemService` uses a structured `PoemInstructions` object and connects to a JTE template, providing better
   organization and type safety.
 
@@ -499,6 +507,12 @@ This implementation demonstrates:
 
 By using the templated approach, we gain strong type safety, explicit parameter mapping, and the ability to leverage
 JTE's powerful templating features for complex prompt engineering.
+
+Since we provided extra flexibility in choosing an LLM library, we wrap the LangChain4j service in a
+`Function<String, Poem>` to make it factory-compatible. For LangChain4j-exclusive implementations, we could simplify
+both the factory and its usage: we'd need just one interface and optionally provide a way (likely via a lambda) to add
+RAG, memory, tools, etc. to the LangChain4j service that we will build right in the factory. We leave this optimization
+as an exercise for the reader.
 
 ## 6. Conclusion
 

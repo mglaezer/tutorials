@@ -524,11 +524,13 @@ This implementation demonstrates:
 By using the templated approach, we gain strong type safety, explicit parameter mapping, and the ability to leverage
 JTE's powerful templating features for complex prompt engineering.
 
-Since we provided extra flexibility in choosing an LLM library, we wrap the LangChain4j service in a
+Since we provided extra flexibility in choosing an LLM library, we had to wrap the LangChain4j service in a
 `Function<String, Poem>` to make it factory-compatible. For LangChain4j-exclusive implementations, we could simplify
-both the factory and its usage: we'd need just one interface and optionally provide a way (likely via a lambda) to add
-RAG, memory, tools, etc. to the LangChain4j service that we will build right in the factory. We leave this optimization
-as an exercise for the reader.
+both the factory and its usage: we'd need just one templating interface and optionally provide a way to add
+RAG, memory, tools, etc. to the LangChain4j service that we will build right in the factory. 
+This would involve dynamically creating an interface with a single method: `ReturnType generate(String prompt);`
+using a library like ByteBuddy or Java's dynamic proxy system.
+We leave this optimization as an exercise for the reader. 
 
 ## 6. Conclusion
 
